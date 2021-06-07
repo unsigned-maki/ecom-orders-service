@@ -127,6 +127,7 @@ class Order:
         self.customer = kwargs.get("customer", "Unknown")
         self.product = kwargs.get("product", "Unknown")
         self.status = kwargs.get("status", "pending")
+        self.item = kwargs.get("item", "None")
 
     @staticmethod
     def from_id(id_):
@@ -142,13 +143,15 @@ class Order:
         self.customer = kwargs.get("customer", self.customer)
         self.product = kwargs.get("product", self.product)
         self.status = kwargs.get("status", self.status)
+        self.item = kwargs.get("item", self.item)
 
     def to_dict(self):
         return {"id": self.__id,
                 "method": self.method,
                 "customer": self.customer,
                 "product": self.product,
-                "status": self.status}
+                "status": self.status,
+                "item": self.item}
 
     def serialize(self):
         return json.dumps(self.to_dict)
@@ -161,7 +164,8 @@ class CursorOrder(Order):
                          method=cursor["method"],
                          customer=cursor["customer"],
                          product=cursor["product"],
-                         status=cursor["status"])
+                         status=cursor["status"],
+                         item=cursor["item"])
 
     def update(self):
         if self.method not in ["None", "paypal", "crypto"]:
@@ -173,7 +177,8 @@ class CursorOrder(Order):
         orders.update_many({"id": self.id}, {"$set": {"method": self.method,
                                                         "customer": self.customer,
                                                          "product": self.product,
-                                                         "status": self.status}})
+                                                         "status": self.status,
+                                                         "item": self.item}})
 
     def remove(self):
         orders.delete_many({"id": self.id})
@@ -194,7 +199,8 @@ class NewOrder(CursorOrder):
                              "method": kwargs.get("method", "None"),
                              "customer": kwargs.get("customer", "Unknown"),
                              "product": kwargs.get("product", "Unknown"),
-                             "status": kwargs.get("status", "pending")})
+                             "status": kwargs.get("status", "pending"),
+                             "item": kwargs.get("item", "None")})
 
         super().__init__(orders.find_one({"id": uid}))
 
